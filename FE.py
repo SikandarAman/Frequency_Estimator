@@ -4,22 +4,22 @@ import matplotlib.pyplot as plt
 
 # PARAMETERS
 f_signal = 50
-duration = 0.1
+duration = 0.1  
 
 # TUNABLE FACTORS
 fs = 5000
-N = 15
+N = 20
 
 Ts = 1/fs
 
 # TIME VECTOR
 t = np.arange(0, duration, Ts)
 
-noise_std = 0.1   
+# NOISE
+noise_std = 0.2
 noise = np.random.normal(0, noise_std, len(t))
 
 # SIGNAL
-# x = np.sin(2*np.pi*f_signal*t)
 x = np.sin(2*np.pi*f_signal*t) + noise
 
 # STORAGE
@@ -33,7 +33,7 @@ original = []
 zc_region_tz = []   # store tz values in region
 Tc_list = []
 
-# WINDOWS
+# WINDOWS PROCESSING
 for k in range(2*N, len(x)):
 
     W1 = x[k-2*N:k-N]
@@ -51,27 +51,32 @@ for k in range(2*N, len(x)):
 
     # SIGN CHANGE REGION
     if m1 * m2 < 0:
-        tz = current_time - N*Ts*(1 - (m1 + m2)/(m1 - m2))
-        tz_est.append(tz)
 
-        # collect tz values
-        zc_region_tz.append(tz)
+        den = 2 * (m1 - m2)
+
+        # Numerical stability check
+        if abs(den) > 1e-12:
+            tz = current_time - N*Ts*(1 - (m1 + m2)/den)
+            tz_est.append(tz)
+            zc_region_tz.append(tz)
+        else:
+            tz_est.append(np.nan)
 
     else:
         tz_est.append(np.nan)
 
-        # if region ended → compute Tc from tz values
+        # Region ended → compute Tc
         if len(zc_region_tz) > 0:
             Tc = np.mean(zc_region_tz)
             Tc_list.append(Tc)
             zc_region_tz = []
 
-# HANDLE last region (if it ends at signal end)
+# HANDLE last region
 if len(zc_region_tz) > 0:
     Tc = np.mean(zc_region_tz)
     Tc_list.append(Tc)
 
-# ARRAYS
+# CONVERT TO ARRAYS
 time_axis = np.array(time_axis)
 MA1 = np.array(MA1)
 MA2 = np.array(MA2)
@@ -83,7 +88,7 @@ Tc_array = np.array(Tc_list)
 valid = ~np.isnan(tz_est)
 tz_plot = tz_est[valid]
 
-# TABLE
+# SAVE TABLE
 df = pd.DataFrame({
     "Time": time_axis,
     "Original_Signal": original,
@@ -101,17 +106,17 @@ plt.plot(t, x, label="Original Signal")
 plt.plot(time_axis, MA1, label="MA1")
 plt.plot(time_axis, MA2, label="MA2")
 
-# Estimated ZC points (formula-based)
+# Estimated ZC points
 plt.scatter(tz_plot, np.zeros_like(tz_plot), 
             marker='x', label="Estimated ZC")
 
-# Tc points (average of tz in each region)
+# Tc points (average of ZC region)
 plt.scatter(Tc_array, np.zeros_like(Tc_array), 
             marker='o', label="Tc (Avg of ZC)", s=70)
 
 plt.xlabel("Time (seconds)")
 plt.ylabel("Amplitude")
-plt.title("Zero Crossing Detection using Dual Moving Averages (Improved Tc)")
+plt.title("Zero Crossing Detection using Dual Moving Averages (Corrected)")
 plt.legend()
 plt.grid(True)
 
