@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # PARAMETERS
 f_signal = 50
-duration = 0.1  
+duration = 0.05 
 
 # TUNABLE FACTORS
 fs = 5000
@@ -16,7 +16,7 @@ Ts = 1/fs
 t = np.arange(0, duration, Ts)
 
 # NOISE
-noise_std = 0.2
+noise_std = 0.1
 noise = np.random.normal(0, noise_std, len(t))
 
 # SIGNAL
@@ -108,11 +108,11 @@ plt.plot(time_axis, MA2, label="MA2")
 
 # Estimated ZC points
 plt.scatter(tz_plot, np.zeros_like(tz_plot), 
-            marker='x', label="Estimated ZC")
+            marker='x', color='black', label="Estimated ZC")
 
-# Tc points (average of ZC region)
+# # Tc points (average of ZC region)
 plt.scatter(Tc_array, np.zeros_like(Tc_array), 
-            marker='o', label="Tc (Avg of ZC)", s=70)
+            marker='o', color ='red', label="Tc (Avg of ZC)", s=70)
 
 plt.xlabel("Time (seconds)")
 plt.ylabel("Amplitude")
