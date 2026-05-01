@@ -17,7 +17,7 @@ Two sliding windows of samples compute consecutive moving averages (MA1, MA2). A
 | `FE_Arduino.ino` | Arduino sketch — samples analog pin A0 at 5 kHz over Serial |
 | `Arduino_Print_Value.ino` | Utility sketch for inspecting raw ADC values |
 | `Arduino_Serial.csv` | Sample data captured from Arduino |
-| `Python_Serial.csv` | Sample data from the Python simulation |
+| `Python_Serial.csv` | Real-time frequency estimation results captured from the Python serial reader |
 
 ## Usage
 
